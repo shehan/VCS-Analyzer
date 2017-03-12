@@ -81,6 +81,72 @@ namespace VCSAnalyzer.Services
                 dbConnection.Close();
             }
         }
+
+        public List<App> GetApps()
+        {
+            List<App> apps = new List<App>();
+            using (var dbConnection = new SQLiteConnection(connectionString))
+            {
+                using (SQLiteCommand command = new SQLiteCommand(dbConnection))
+                {
+                    dbConnection.Open();
+                    using (var transaction = dbConnection.BeginTransaction())
+                    {
+
+                        command.CommandText = "SELECT* FROM APP WHERE REPO_TYPE = 'git'";
+                        command.CommandType = System.Data.CommandType.Text;
+                        SQLiteDataReader reader = command.ExecuteReader();
+                        App app;
+                        while (reader.Read())
+                        {
+                            app = new App();
+                            app.Name = reader["NAME"].ToString();
+                            app.FriendlyName = reader["FRIENDLY_NAME"].ToString();
+                            app.Summary = reader["SUMMARY"].ToString();
+                            app.Category = reader["CATEGORY"].ToString();
+                            app.Website = reader["WEBSITE"].ToString();
+                            app.License = reader["LICENSE"].ToString();
+                            app.RepoType = reader["REPO_TYPE"].ToString();
+                            app.IssueTracker = reader["ISSUE_TRACKER"].ToString();
+                            app.Source = reader["SOURCE"].ToString();
+                            app.Id = Convert.ToInt64(reader["ID"]);
+
+                            apps.Add(app);
+                        }
+                    }
+                    dbConnection.Close();
+                }
+            }
+
+            return apps;
+        }
+
+        public void UpsertAppDonwload(long appId, DateTime dowloadDate)
+        {
+            string UPSERT_TABLE_APP_CLONE = "INSERT OR REPLACE INTO APP_CLONE (APPID, LAST_DOWNLOAD_DATE, LAST_DOWNLOAD_DATE_TICKS, ID) " +
+               "VALUES (  " +
+               "{0}, " +
+               "'{1}', " +
+               "{2}, " +
+               "(SELECT ID FROM APP_CLONE WHERE APPID = {0})" +
+               ");";
+            string commandText = string.Format(UPSERT_TABLE_APP_CLONE, appId, dowloadDate.ToString(), dowloadDate.Ticks);
+
+            using (var dbConnection = new SQLiteConnection(connectionString))
+            {
+                using (SQLiteCommand command = new SQLiteCommand(dbConnection))
+                {
+                    dbConnection.Open();
+                    using (var transaction = dbConnection.BeginTransaction())
+                    {
+                        command.CommandText = commandText;
+                        command.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+                    dbConnection.Close();
+                }
+            }
+        }
         /*
                 public void BatchInsertManifest(List<Manifest> manifests)
                 {

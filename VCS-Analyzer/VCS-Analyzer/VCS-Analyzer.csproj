@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\App.cs" />
+    <Compile Include="Tasks\AppRepos.cs" />
     <Compile Include="Tasks\InitDatabase.cs" />
     <Compile Include="ProcessFactory.cs" />
     <Compile Include="Tasks\FDroid.cs" />
