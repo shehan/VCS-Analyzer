@@ -45,10 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\App.cs" />
-    <Compile Include="InitDatabase\InitDatabase.cs" />
+    <Compile Include="Tasks\InitDatabase.cs" />
     <Compile Include="ProcessFactory.cs" />
-    <Compile Include="FDroid\FDroid.cs" />
-    <Compile Include="FDroid\SourceFileParser.cs" />
+    <Compile Include="Tasks\FDroid.cs" />
+    <Compile Include="Tasks\SourceFileParser.cs" />
     <Compile Include="IProcess.cs" />
     <Compile Include="Services\Database.cs" />
     <Compile Include="Services\Notification.cs" />

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using VCS_Analyzer.Entities;
+using VCSAnalyzer.Entities;
 
-namespace VCSAnalyzer.FDroid
+namespace VCSAnalyzer.Tasks
 {
     class SourceFileParser
     {

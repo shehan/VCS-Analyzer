@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VCS_Analyzer.Services;
+using VCSAnalyzer.Services;
 
-namespace VCS_Analyzer
+namespace VCSAnalyzer
 {
     public interface IProcess
     {
         void StartProcess();
 
         event EventHandler<NotificationArgs> NotificationIssued;
+
+        void OnMessageIssued(NotificationArgs e);
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VCS_Analyzer.Entities
+namespace VCSAnalyzer.Entities
 {
     class App
     {

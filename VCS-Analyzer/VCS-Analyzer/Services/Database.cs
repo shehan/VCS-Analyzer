@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
-using VCS_Analyzer.Entities;
+using VCSAnalyzer.Entities;
 using System.IO;
 
-namespace VCS_Analyzer.Services
+namespace VCSAnalyzer.Services
 {
     class Database
-    { 
+    {
         string connectionString;
 
         public Database()
@@ -19,9 +19,28 @@ namespace VCS_Analyzer.Services
             connectionString = ConfigurationManager.AppSettings.Get("DatabaseConnectionString");
         }
 
-        private void InitializeDatabase()
+        public void CreateDatabase(string path)
         {
-           
+            SQLiteConnection.CreateFile(path);
+        }
+
+        public void CreateTable(string SQLStatement)
+        {
+            using (var dbConnection = new SQLiteConnection(connectionString))
+            {
+                dbConnection.Open();
+                using (SQLiteCommand command = new SQLiteCommand(dbConnection))
+                {
+                    using (var transaction = dbConnection.BeginTransaction())
+                    {
+                        command.CommandText = SQLStatement;
+                        command.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+                }
+
+                dbConnection.Close();
+            }
         }
 
 

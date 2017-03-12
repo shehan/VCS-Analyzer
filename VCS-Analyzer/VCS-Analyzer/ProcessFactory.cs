@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VCSAnalyzer.FDroid;
+using VCSAnalyzer.Tasks;
 
-namespace VCS_Analyzer
+namespace VCSAnalyzer
 {
     public class ProcessFactory
     {
@@ -22,6 +22,9 @@ namespace VCS_Analyzer
                         process = new FDroid(true);
                     else
                         throw new ArgumentException();
+                    break;
+                case "init":
+                    process = new InitDatabase();
                     break;
                 default: throw new ArgumentException();
             }

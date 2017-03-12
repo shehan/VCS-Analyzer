@@ -6,8 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using VCS_Analyzer;
-using VCS_Analyzer.Services;
+using VCSAnalyzer;
+using VCSAnalyzer.Services;
 
 namespace VCSAnalyzer.CLI
 {

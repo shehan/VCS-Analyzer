@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VCS_Analyzer.Services;
-using VCS_Analyzer.Entities;
+using VCSAnalyzer.Services;
+using VCSAnalyzer.Entities;
 using LibGit2Sharp.Handlers;
-using VCS_Analyzer;
+using VCSAnalyzer;
 using System.Configuration;
 using System.Threading;
 
-namespace VCSAnalyzer.FDroid
+namespace VCSAnalyzer.Tasks
 {
     public class FDroid : IProcess
     {
@@ -93,7 +93,7 @@ namespace VCSAnalyzer.FDroid
             OnMessageIssued(notificationArgs);
         }
 
-        protected virtual void OnMessageIssued(NotificationArgs e)
+        public void OnMessageIssued(NotificationArgs e)
         {
             NotificationIssued?.Invoke(this, e);
         }
