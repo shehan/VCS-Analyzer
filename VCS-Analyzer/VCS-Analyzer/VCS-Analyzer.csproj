@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Build\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -38,14 +38,14 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="..\App.config">
+      <Link>App.config</Link>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\App.cs" />
+    <Compile Include="InitDatabase\InitDatabase.cs" />
     <Compile Include="ProcessFactory.cs" />
     <Compile Include="FDroid\FDroid.cs" />
     <Compile Include="FDroid\SourceFileParser.cs" />
