@@ -14,25 +14,10 @@ namespace VCSAnalyzer.FDroid
         string directory;
         FileInfo[] files;
 
-        public FileInfo[] Files
-        {
-            get
-            {
-                if (files == null)
-                {
-                    GetTextFiles();
-                }
-                return files;
-            }
-        }
-
         public SourceFileParser(string Directory)
         {
             this.directory = Directory;
-        }
 
-        private void GetTextFiles()
-        {
             DirectoryInfo dinfo = new DirectoryInfo(directory);
             files = dinfo.GetFiles("*.txt");
         }
