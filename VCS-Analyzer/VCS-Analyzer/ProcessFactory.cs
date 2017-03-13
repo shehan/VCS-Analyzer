@@ -26,7 +26,7 @@ namespace VCSAnalyzer
                 case "init":
                     process = new InitDatabase();
                     break;
-                case "ss":
+                case "apps":
                     process = new AppRepos();
                     break;
 
