@@ -26,6 +26,10 @@ namespace VCSAnalyzer
                 case "init":
                     process = new InitDatabase();
                     break;
+                case "ss":
+                    process = new AppRepos();
+                    break;
+
                 default: throw new ArgumentException();
             }
             

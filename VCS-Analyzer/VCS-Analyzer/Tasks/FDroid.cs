@@ -1,13 +1,9 @@
 ﻿using LibGit2Sharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VCSAnalyzer.Services;
 using VCSAnalyzer.Entities;
 using LibGit2Sharp.Handlers;
-using VCSAnalyzer;
 using System.Configuration;
 using System.Threading;
 
@@ -15,7 +11,8 @@ namespace VCSAnalyzer.Tasks
 {
     public class FDroid : IProcess
     {
-        private string downloadDirectory,repositoryPath;
+        private string downloadDirectory, repositoryPath;
+        private bool onlyUpdate;
 
         public event EventHandler<NotificationArgs> NotificationIssued;
 
@@ -23,19 +20,25 @@ namespace VCSAnalyzer.Tasks
         {
             downloadDirectory = ConfigurationManager.AppSettings.Get("FDroidDownloadPath");
             repositoryPath = ConfigurationManager.AppSettings.Get("FDroidGitRepository");
+            onlyUpdate = update;
         }
 
         public void StartProcess()
         {
-            Thread startProcess = new Thread(CloneRepository);
-            startProcess.Start();
-
+            if (onlyUpdate)
+            {
+                Thread startProcess = new Thread(CloneRepository);
+                startProcess.Start();
+            }
+            else
+            {
+                Thread startProcess = new Thread(UpdateRepository);
+                startProcess.Start();
+            }
         }
 
         public void UpdateRepository()
         {
-            throw new NotImplementedException();
-
             NotificationArgs notificationArgs = new NotificationArgs("Started - Update F-Droid Repositroy", DateTime.Now, NotificationType.INFORMATION);
             OnMessageIssued(notificationArgs);
 
@@ -54,7 +57,8 @@ namespace VCSAnalyzer.Tasks
                 Commands.Pull(repo, new Signature("xxx", "xxx", new DateTimeOffset(DateTime.Now)), options);
             }
 
-
+            notificationArgs = new NotificationArgs("Completed - Update F-Droid Repositroy", DateTime.Now, NotificationType.INFORMATION);
+            OnMessageIssued(notificationArgs);
         }
 
         public void CloneRepository()
@@ -99,6 +103,6 @@ namespace VCSAnalyzer.Tasks
         }
 
 
-        
+
     }
 }
