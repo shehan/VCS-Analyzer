@@ -96,22 +96,9 @@ namespace VCSAnalyzer.Services
                         command.CommandText = "SELECT* FROM APP WHERE REPO_TYPE = 'git'";
                         command.CommandType = System.Data.CommandType.Text;
                         SQLiteDataReader reader = command.ExecuteReader();
-                        App app;
                         while (reader.Read())
                         {
-                            app = new App();
-                            app.Name = reader["NAME"].ToString();
-                            app.FriendlyName = reader["FRIENDLY_NAME"].ToString();
-                            app.Summary = reader["SUMMARY"].ToString();
-                            app.Category = reader["CATEGORY"].ToString();
-                            app.Website = reader["WEBSITE"].ToString();
-                            app.License = reader["LICENSE"].ToString();
-                            app.RepoType = reader["REPO_TYPE"].ToString();
-                            app.IssueTracker = reader["ISSUE_TRACKER"].ToString();
-                            app.Source = reader["SOURCE"].ToString();
-                            app.Id = Convert.ToInt64(reader["ID"]);
-
-                            apps.Add(app);
+                            apps.Add(ConstructApp(reader));
                         }
                     }
                     dbConnection.Close();
@@ -146,6 +133,149 @@ namespace VCSAnalyzer.Services
                     dbConnection.Close();
                 }
             }
+        }
+
+        public App GetAppByName(string Name)
+        {
+            App app = new App();
+            using (var dbConnection = new SQLiteConnection(connectionString))
+            {
+                using (SQLiteCommand command = new SQLiteCommand(dbConnection))
+                {
+                    dbConnection.Open();
+                    using (var transaction = dbConnection.BeginTransaction())
+                    {
+
+                        command.CommandText = string.Format("SELECT * FROM APP WHERE NAME='{0}' ", Name);
+                        command.CommandType = System.Data.CommandType.Text;
+                        SQLiteDataReader reader = command.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            app = ConstructApp(reader);
+                        }
+                    }
+
+                    dbConnection.Close();
+                }
+            }
+
+            return app;
+        }
+
+        public void BatchInsertCommits(List<Commit> Commits, long AppID)
+        {
+            using (var dbConnection = new SQLiteConnection(connectionString))
+            {
+                using (SQLiteCommand command = new SQLiteCommand(dbConnection))
+                {
+                    dbConnection.Open();
+                    string commandText;
+                    try
+                    {
+                        using (var transaction = dbConnection.BeginTransaction())
+                        {
+                            foreach (var commit in Commits)
+                            {
+                                commandText = string.Format("INSERT INTO COMMIT_LOG " +
+                                    "(GUID, MESSAGE, AUTHOR_NAME, AUTHOR_EMAIL, DATE_TEXT, DATE_TICKS, APPID) " +
+                                    "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', {5}, {6}); " +
+                                    "SELECT last_insert_rowid();",
+                                    commit.GUID,
+                                    commit.Message.Replace("'", "''"),
+                                    commit.AuthorName.Replace("'", "''"),
+                                    commit.AuthorEmail,
+                                    commit.Date.ToString(),
+                                    commit.Date.Ticks,
+                                    AppID);
+                                command.CommandText = commandText;
+                                object obj = command.ExecuteScalar();
+
+                                foreach (var file in commit.CommitFiles)
+                                {
+                                    commandText = string.Format("INSERT INTO COMMIT_LOG_FILE " +
+                                        "(PATH, OPERATION, COMMIT_GUID, COMMITID, APPID) " +
+                                        "VALUES ('{0}', '{1}', '{2}', {3}, {4});",
+                                        file.Path.Replace("'", "''"),
+                                        file.Operation,
+                                        commit.GUID,
+                                        (long)obj,
+                                        AppID);
+                                    command.CommandText = commandText;
+                                    command.ExecuteNonQuery();
+                                }
+                            }
+
+                            transaction.Commit();
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        dbConnection.Close();
+                        throw error;
+                    }
+
+                    dbConnection.Close();
+                }
+            }
+        }
+
+
+        public void BatchInsertTag(List<Tag> Tags, long AppID)
+        {
+            using (var dbConnection = new SQLiteConnection(connectionString))
+            {
+                using (SQLiteCommand command = new SQLiteCommand(dbConnection))
+                {
+                    dbConnection.Open();
+                    string commandText;
+                    try
+                    {
+                        using (var transaction = dbConnection.BeginTransaction())
+                        {
+                            foreach (var tag in Tags)
+                            {
+                                commandText = string.Format("INSERT INTO TAG " +
+                                    "(NAME, GUID, MESSAGE, AUTHOR_EMAIL, DATE_TEXT, DATE_TICKS, APPID) " +
+                                    "VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', {5}, {6});",
+                                    tag.Name,
+                                    tag.Id,
+                                    tag.Message.Replace("'", "''"),
+                                    tag.AuthorEmail,
+                                    tag.Date.ToString(),
+                                    tag.Date.Ticks,
+                                    AppID);
+                                command.CommandText = commandText;
+                                command.ExecuteNonQuery();
+                            }
+                            transaction.Commit();
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        dbConnection.Close();
+                        throw error;
+                    }
+
+                    dbConnection.Close();
+                }
+            }
+        }
+
+        private App ConstructApp(SQLiteDataReader reader)
+        {
+            App app = new App();
+            app.Name = reader["NAME"].ToString();
+            app.FriendlyName = reader["FRIENDLY_NAME"].ToString();
+            app.Summary = reader["SUMMARY"].ToString();
+            app.Category = reader["CATEGORY"].ToString();
+            app.Website = reader["WEBSITE"].ToString();
+            app.License = reader["LICENSE"].ToString();
+            app.RepoType = reader["REPO_TYPE"].ToString();
+            app.IssueTracker = reader["ISSUE_TRACKER"].ToString();
+            app.Source = reader["SOURCE"].ToString();
+            app.Id = Convert.ToInt64(reader["ID"]);
+
+            return app;
         }
         /*
                 public void BatchInsertManifest(List<Manifest> manifests)
@@ -206,126 +336,10 @@ namespace VCSAnalyzer.Services
                     }
                 }
 
-                public void BatchInsertTag(List<Tag> Tags, long AppID)
-                {
-                    using (SQLiteCommand command = new SQLiteCommand(dbConnection))
-                    {
-                        dbConnection.Open();
-                        string commandText;
-                        try
-                        {
-                            using (var transaction = dbConnection.BeginTransaction())
-                            {
-                                foreach (var tag in Tags)
-                                {
-                                    commandText = string.Format(Constants.INSERT_TABLE_TAG,
-                                        tag.Name,
-                                        tag.Id,
-                                        tag.Message.Replace("'", "''"),
-                                        tag.AuthorEmail,
-                                        tag.Date.ToString(),
-                                        tag.Date.Ticks,
-                                        AppID);
-                                    command.CommandText = commandText;
-                                    command.ExecuteNonQuery();
-                                }
 
-                                transaction.Commit();
-                            }
-                        }
-                        catch (Exception error)
-                        {
-                            dbConnection.Close();
-                            throw error;
-                        }
 
-                        dbConnection.Close();
-                    }
-                }
 
-                public void BatchInsertCommits(List<Commit> Commits, long AppID)
-                {
-                    using (SQLiteCommand command = new SQLiteCommand(dbConnection))
-                    {
-                        dbConnection.Open();
-                        string commandText;
-                        try
-                        {
-                            using (var transaction = dbConnection.BeginTransaction())
-                            {
-                                foreach (var commit in Commits)
-                                {
-                                    commandText = string.Format(Constants.INSERT_TABLE_COMMIT_LOG,
-                                        commit.GUID,
-                                        commit.Message.Replace("'", "''"),
-                                        commit.AuthorName.Replace("'", "''"),
-                                        commit.AuthorEmail,
-                                        commit.Date.ToString(),
-                                        commit.Date.Ticks,
-                                        AppID);
-                                    command.CommandText = commandText;
-                                    //command.ExecuteNonQuery();
-                                    object obj = command.ExecuteScalar();
 
-                                    foreach (var file in commit.CommitFiles)
-                                    {
-                                        commandText = string.Format(Constants.INSERT_TABLE_COMMIT_LOG_FILE,
-                                            file.Path.Replace("'", "''"),
-                                            file.Operation,
-                                            commit.GUID,
-                                            (long)obj,
-                                            AppID);
-                                        command.CommandText = commandText;
-                                        command.ExecuteNonQuery();
-                                    }
-                                }
-
-                                transaction.Commit();
-                            }
-                        }
-                        catch (Exception error)
-                        {
-                            dbConnection.Close();
-                            throw error;
-                        }
-
-                        dbConnection.Close();
-                    }
-                }
-
-                public App GetAppByName(string Name)
-                {
-                    App app = new App();
-                    using (SQLiteCommand command = new SQLiteCommand(dbConnection))
-                    {
-                        dbConnection.Open();
-                        using (var transaction = dbConnection.BeginTransaction())
-                        {
-
-                            command.CommandText = string.Format(Constants.SELECT_APP, Name);
-                            command.CommandType = System.Data.CommandType.Text;
-                            SQLiteDataReader reader = command.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                app = new App();
-                                app.Name = reader[Constants.COLUMN_APP_NAME].ToString();
-                                app.FriendlyName = reader[Constants.COLUMN_APP_FRIENDLY_NAME].ToString();
-                                app.Summary = reader[Constants.COLUMN_APP_SUMMARY].ToString();
-                                app.Category = reader[Constants.COLUMN_APP_CATEGORY].ToString();
-                                app.Website = reader[Constants.COLUMN_APP_WEBSITE].ToString();
-                                app.License = reader[Constants.COLUMN_APP_LICENSE].ToString();
-                                app.RepoType = reader[Constants.COLUMN_APP_REPO_TYPE].ToString();
-                                app.IssueTracker = reader[Constants.COLUMN_APP_ISSUE_TRACKER].ToString();
-                                app.Source = reader[Constants.COLUMN_APP_SOURCE].ToString();
-                                app.Id = Convert.ToInt64(reader[Constants.COLUMN_APP_ID]);
-                            }
-                        }
-
-                        dbConnection.Close();
-                    }
-
-                    return app;
-                }
 
                 public long GetCommitId(long AppID, string CommitGUID)
                 {

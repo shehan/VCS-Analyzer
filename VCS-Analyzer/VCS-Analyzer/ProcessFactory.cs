@@ -29,6 +29,12 @@ namespace VCSAnalyzer
                 case "apps":
                     process = new AppRepos();
                     break;
+                case "commits":
+                    process = new AppCommits(false);
+                    break;
+                case "tags":
+                    process = new AppTags(false);
+                    break;
 
                 default: throw new ArgumentException();
             }
