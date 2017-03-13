@@ -27,12 +27,12 @@ namespace VCSAnalyzer.Tasks
         {
             if (onlyUpdate)
             {
-                Thread startProcess = new Thread(CloneRepository);
+                Thread startProcess = new Thread(UpdateRepository);
                 startProcess.Start();
             }
             else
             {
-                Thread startProcess = new Thread(UpdateRepository);
+                Thread startProcess = new Thread(CloneRepository);
                 startProcess.Start();
             }
         }
