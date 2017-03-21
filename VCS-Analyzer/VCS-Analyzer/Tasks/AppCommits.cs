@@ -40,9 +40,9 @@ namespace VCSAnalyzer.Tasks
         {
             Database db = new Database();
             Repository repo;
-            List<Entities.Commit> commiList;
-            Entities.Commit commit;
-            CommitFile commitFile;
+            //List<Entities.Commit> commiList 
+            //Entities.Commit commit;
+            //CommitFile commitFile;
             NotificationArgs notificationArgs;
 
             var directories = Directory.GetDirectories(downloadDirectory);
@@ -66,7 +66,7 @@ namespace VCSAnalyzer.Tasks
                         try
                         {
                             repo = new Repository(directory);
-                            commiList = new List<Entities.Commit>();
+                            List<Entities.Commit> commiList = new List<Entities.Commit>();
 
                             int commitCount = repo.Commits.Count();
 
@@ -77,7 +77,7 @@ namespace VCSAnalyzer.Tasks
                             foreach (var cx in repo.Commits)
                             // for (int i = commitCount - 1; i >= 0; i--)
                             {
-                                commit = new Entities.Commit();
+                                Entities.Commit commit = new Entities.Commit();
                                 commit.AuthorEmail = cx.Author.Email;
                                 commit.AuthorEmail = cx.Author.Email;
                                 commit.AuthorName = cx.Author.Name;
@@ -97,7 +97,7 @@ namespace VCSAnalyzer.Tasks
                                         {
                                             if (item.Status != ChangeKind.Deleted)
                                             {
-                                                commitFile = new CommitFile(item.Path, ChangeKind.Added.ToString());
+                                                CommitFile commitFile = new CommitFile(item.Path, ChangeKind.Added.ToString());
                                                 commit.CommitFiles.Add(commitFile);
                                             }
                                         }
@@ -107,7 +107,7 @@ namespace VCSAnalyzer.Tasks
                                         var changes = repo.Diff.Compare<TreeChanges>(repo.Commits.ElementAt(j + 1).Tree, repo.Commits.ElementAt(j).Tree);
                                         foreach (var item in changes)
                                         {
-                                            commitFile = new CommitFile(item.Path, item.Status.ToString());
+                                            CommitFile commitFile = new CommitFile(item.Path, item.Status.ToString());
                                             commit.CommitFiles.Add(commitFile);
                                         }
                                     }

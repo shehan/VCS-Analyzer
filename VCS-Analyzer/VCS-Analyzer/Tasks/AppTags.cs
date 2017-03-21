@@ -42,8 +42,8 @@ namespace VCSAnalyzer.Tasks
         {
             Database db = new Database();
             Repository repo;
-            List<Entities.Tag> tagList;
-            Entities.Tag tag;
+            //List<Entities.Tag> tagList;
+            //Entities.Tag tag;
             NotificationArgs notificationArgs;
 
             var directories = Directory.GetDirectories(downloadDirectory);
@@ -67,7 +67,7 @@ namespace VCSAnalyzer.Tasks
                         try
                         {
                             repo = new Repository(directory);
-                            tagList = new List<Entities.Tag>();
+                            List<Entities.Tag> tagList = new List<Entities.Tag>();
                             repoURL = repo.Config.GetValueOrDefault<string>("remote.origin.url");
 
                             int tagCount = repo.Tags.Count();
@@ -81,7 +81,7 @@ namespace VCSAnalyzer.Tasks
                             foreach (var t in xxx)
                             {
                                 tg = (LibGit2Sharp.Commit)t.PeeledTarget;
-                                tag = new Entities.Tag(t.FriendlyName, tg.MessageShort, tg.Author.Email, tg.Id.ToString(), tg.Author.When.LocalDateTime);
+                                Entities.Tag tag = new Entities.Tag(t.FriendlyName, tg.MessageShort, tg.Author.Email, tg.Id.ToString(), tg.Author.When.LocalDateTime);
                                 tagList.Add(tag);
 
                                 using (var client = new WebClient())
